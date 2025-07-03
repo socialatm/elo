@@ -5,7 +5,6 @@ import pandas as pd
 from datetime import date
 import statistics
 import os
-import shutil
 
 def generate_ufc_stats_path():
     response = requests.get(url="http://ufcstats.com/statistics/events/completed")
