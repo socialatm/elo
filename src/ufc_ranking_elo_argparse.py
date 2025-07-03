@@ -9,7 +9,6 @@ parser = argparse.ArgumentParser(description="Ranks UFC fighters by the Elo-rati
 parser.add_argument("-n", "--number", dest="N", type=int, default=15, help="Number of fighters to be displayed (default: %(default)s)")
 parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output with more columns")
 
-
 args = parser.parse_args()
 
 def generate_ufc_stats_path():
@@ -76,7 +75,6 @@ def scrapping(url):
         return(ufc_fight_results)
     except:
         pass
-
 
 every_ufc_fight = []
 urls = []
@@ -234,7 +232,6 @@ def generate_elo():
         if elo[fighter_a] > peak_elo[fighter_a]:
             peak_elo.update({fighter_a:elo[fighter_a]})
             peak_elo_year.update({fighter_a:every_event_year[cont]})
-
 
         number_of_fights[fighter_a] += 1
         number_of_fights[fighter_b] += 1
