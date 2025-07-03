@@ -78,11 +78,11 @@ every_ufc_fight = []
 urls = []
 event_years = []
 ### RETURNS A LIST OF ALL FIGHTERS FROM THE SPECIFIED EVENT. (LOSER, WINNER, LOSER, WINNER, ...)
-if "src" in os.getcwd():
-    print(os.getcwd())
-    csv_path = os.getcwd().replace("src", "csv/UFC_db.csv")
-else:
-    csv_path = os.getcwd()
+# Get the directory where the current script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Construct the full path to the CSV file
+csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
+
 with open(csv_path, "r") as f:
     link_check = 'No link available'
     instance = []
@@ -482,9 +482,9 @@ def organize_files():
     if os.path.exists(file_name): #Deletes csv file after the code is finished
         os.remove(file_name)
         os.remove(file_name2)
-        current_path = os.getcwd()
-        web_path = current_path.replace("src", "")
-        web_path += "docs"
+                
+        # Construct the web path
+        web_path = os.path.join(script_dir, "docs")
 
         if not os.path.exists(web_path):
             os.makedirs(web_path)
@@ -497,7 +497,7 @@ def organize_files():
     files_to_move = ['index.html', 'peak_elo.html']
 
     for file_name in files_to_move:
-        source_file_path = os.path.join(current_path, file_name)
+        source_file_path = os.path.join(script_dir, file_name)
         destination_file_path = os.path.join(web_path, file_name)
         shutil.move(source_file_path, destination_file_path)
     print("\nWeb Files moved to", web_path)
