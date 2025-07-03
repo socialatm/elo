@@ -6,8 +6,8 @@ import os
 import argparse 
 
 parser = argparse.ArgumentParser(description="Ranks UFC fighters by the Elo-rating system")
-parser.add_argument("N", type=int, default=15, help="Number of fighters to be displayed")
-parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+parser.add_argument("-n", "--number", dest="N", type=int, default=15, help="Number of fighters to be displayed (default: %(default)s)")
+parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output with more columns")
 
 
 args = parser.parse_args()
