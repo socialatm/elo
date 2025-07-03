@@ -8,7 +8,7 @@ import os
 import shutil
 
 def generate_ufc_stats_path():
-    response = requests.get(url="http://www.ufcstats.com/statistics/events/completed?page=all")
+    response = requests.get(url="http://ufcstats.com/statistics/events/completed")
     soup = BeautifulSoup(response.content, 'html.parser')
 
     table = soup.find_all('a')
