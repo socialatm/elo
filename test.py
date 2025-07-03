@@ -8,7 +8,7 @@ import os
 import shutil
 
 def generate_ufc_stats_path():
-    response = requests.get(url="http://www.ufcstats.com/statistics/events/completed?page=all")
+    response = requests.get(url="http://ufcstats.com/statistics/events/completed?page=all")
     soup = BeautifulSoup(response.content, 'html.parser')
 
     table = soup.find_all('a')
@@ -477,29 +477,30 @@ def add_last_5_fights():
 
     
 def organize_files():
-    file_name = str(date.today()) + "-elo.csv"
-    file_name2 = str(date.today()) + "-peak_elo.csv"
-    if os.path.exists(file_name): #Deletes csv file after the code is finished
-        os.remove(file_name)
-        os.remove(file_name2)
-                
-        # Construct the web path
-        web_path = os.path.join(script_dir, "docs")
+    # --- 1. Clean up temporary CSV files ---
+    today_str = str(date.today())
+    temp_csv_files = [
+        f"{today_str}-elo.csv",
+        f"{today_str}-peak_elo.csv"
+    ]
+    for csv_file in temp_csv_files:
+        try:
+            os.remove(os.path.join(script_dir, csv_file))
+        except FileNotFoundError:
+            pass  # File didn't exist, which is fine.
 
-        if not os.path.exists(web_path):
-            os.makedirs(web_path)
-
-        if os.path.exists(web_path + "index.html"):
-            os.remove(web_path + "index.html")
-        if os.path.exists(web_path + "peak_elo.html"):
-            os.remove(web_path + "peak_elo.html")
+    # --- 2. Organize final HTML files ---
+    web_path = os.path.join(script_dir, "docs")
+    os.makedirs(web_path, exist_ok=True)
 
     files_to_move = ['index.html', 'peak_elo.html']
-
-    for file_name in files_to_move:
-        source_file_path = os.path.join(script_dir, file_name)
-        destination_file_path = os.path.join(web_path, file_name)
-        shutil.move(source_file_path, destination_file_path)
+    for html_file in files_to_move:
+        source_path = os.path.join(script_dir, html_file)
+        destination_path = os.path.join(web_path, html_file)
+        if os.path.exists(source_path):
+            # os.replace() will atomically move the file and overwrite the
+            # destination if it already exists. This is more robust than shutil.move().
+            os.replace(source_path, destination_path)
     print("\nWeb Files moved to", web_path)
 
 
