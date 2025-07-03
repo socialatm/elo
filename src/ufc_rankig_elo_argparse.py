@@ -309,17 +309,6 @@ def print_last_items_verbose(x):
         cont += 1
 
 if args.verbose:
-    cont = 1
-    items = list(sorted_dictionary_updated.items())[-args.N:]
-    print("Rank  | Fighter                  | Elo Rating | Peak Elo | Record   |Streak | Avg. Opp. Elo")
-    print("------|--------------------------|------------|----------|----------|-------|--------------")
-    for key, value in reversed(items):
-        peak_elo_value = peak_elo[key] if key in peak_elo else "N/A"  # Handle cases where peak_elo is not available
-        fighter_info = f"{cont}°".ljust(6) + "| " + key.ljust(25) + "| " + f"{value:.1f}".ljust(11) + "| " + \
-                       f"{peak_elo_value:.1f}".ljust(9) + "| " + f"{number_of_wins[key]}-{number_of_losses[key]}-{number_of_draws[key]}".ljust(9) + "| " + \
-                       f"{unbeaten_streak[key]}".ljust(6) + "| " + f"{strenght_of_schedule[key]:.1f}"
-        print(fighter_info)
-        cont += 1
-
+    print_last_items_verbose(args.N)
 else:
     print_last_items(sorted_dictionary_updated, args.N)
