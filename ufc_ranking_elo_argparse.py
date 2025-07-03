@@ -37,7 +37,6 @@ def scrapping(url):
             ufc_fight_results = [i.text.strip() for i in table]
             ufc_fight_results.reverse()
 
-            global year
             year_ = soup.find('li', class_='b-list__box-list-item')
             year = year_.text.strip()[-4::]
 
@@ -72,10 +71,9 @@ def scrapping(url):
                 aux += 2
                 cont +=1
 
-        return(ufc_fight_results)
-    except:
-        pass
-
+            return ufc_fight_results, year
+    except AttributeError:
+        return None, None
 every_ufc_fight = []
 urls = []
 event_years = []
@@ -132,8 +130,6 @@ fights = []
 for i in every_ufc_fight:
     for e in i:
         fights.append(e)
-fighters = []
-
 
 ''' ###GETTING EVERY EVENT'S YEAR !!!IMPORTANTE FOR MANUAL CHANGES
 for i in urls:
@@ -144,13 +140,11 @@ print(event_years)'''
 
 every_event_year = []
 def generate_ufc_fighters():
+    fighter_set = set()
     for i in fights:
-        if i != 'win' and i != 'nc' and i != 'draw' and i not in fighters:
-            fighters.append(i)
-    return fighters
-
-all_fighters = generate_ufc_fighters()
-
+        if i not in {'win', 'nc', 'draw'}:
+            fighter_set.add(i)
+    return list(fighter_set)
 
 starting_rating = 100
 k_factor = 32
@@ -166,8 +160,8 @@ unbeaten_streak = {}
 last_5_fights = {}
 
 def generate_elo():
-    fighters = generate_ufc_fighters()
-    for i in fighters:
+    all_fighters = generate_ufc_fighters()
+    for i in all_fighters:
         elo.update({i:starting_rating})
         number_of_wins.update({i:0})
         number_of_losses.update({i:0})
@@ -242,7 +236,7 @@ def generate_elo():
     global sorted_dictionary
     global sorted_strenght_of_schedule
 
-    for i in fighters:
+    for i in all_fighters:
             if number_of_fights[i] > 0:
                 strenght_of_schedule[i] = strenght_of_schedule[i] / number_of_fights[i]
 
@@ -260,18 +254,16 @@ def update():
     new_years = []
     new_links = []
     new_fights = []
-    [new_links.append(i) for i in nl if i not in urls]
+    existing_urls = set(urls)
+    new_links = [i for i in nl if i not in existing_urls]
+
     if len(new_links) > 0:
-        [new_fights.append(scrapping(i)) for i in new_links]
-
-    for i in new_fights:
-        if i != None:
-            every_ufc_fight.append(i)
-            event_years.append(year)
-            new_years.append(year)
-
-            for e in i:
-                fights.append(e)
+        for link in new_links:
+            fight_results, event_year = scrapping(link)
+            if fight_results and event_year:
+                new_fights.append(fight_results)
+                new_years.append(event_year)
+                fights.extend(fight_results)
     cont = 0
     for event in every_ufc_fight:
         number_of_events = int(len(event)/3)

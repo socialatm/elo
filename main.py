@@ -29,7 +29,7 @@ def scrapping(url):
     happened = soup.find('i', class_="b-flag__text")
     try:
         if (happened.text == 'win' or happened.text == 'draw' or happened.text == 'nc'):
-
+            ufc_fight_results = []
             table = soup.find_all('a', class_="b-link b-link_style_black")
             ufc_fight_results = [i.text.strip() for i in table]
             ufc_fight_results.reverse()
@@ -69,10 +69,9 @@ def scrapping(url):
                 aux += 2
                 cont +=1
 
-        return(ufc_fight_results)
-    except:
-        pass
-
+            return ufc_fight_results, year
+    except AttributeError: # More specific exception
+        return None, None # Return a consistent type
 
 every_ufc_fight = []
 urls = []
@@ -83,34 +82,32 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # Construct the full path to the CSV file
 csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
 
-with open(csv_path, "r") as f:
-    link_check = 'No link available'
-    instance = []
-    for row in f:
-        columns = row.strip().split(",")
-        loser = columns[0]
-        winner = columns[1]
-        method = columns[2]
-        year = columns[3]
-        link = columns[4]
+try:
+    with open(csv_path, "r", newline='') as f:
+        reader = csv.reader(f)
+        link_check = 'No link available'
+        instance = []
+        # Skip header if it exists
+        # next(reader, None) 
+        for row in reader:
+            if not row: continue # skip empty rows
+            loser, winner, method, year, link = row
 
-        urls.append(link)
+            urls.append(link)
 
-        if link == link_check:
-            instance.append(loser)
-            instance.append(winner)
-            instance.append(method)
-        else:
+            if link == link_check:
+                instance.extend([loser, winner, method])
+            else:
+                if instance:
+                    every_ufc_fight.append(instance)
+                event_years.append(year)
+                instance = [loser, winner, method]
+                link_check = link
+        if instance:
             event_years.append(year)
             every_ufc_fight.append(instance)
-            instance = []
-            link_check = link
-            instance.append(loser)
-            instance.append(winner)
-            instance.append(method)
-    if instance:
-        event_years.append(year)
-        every_ufc_fight.append(instance)
+except FileNotFoundError:
+    print(f"Warning: {csv_path} not found. Starting with an empty database.")
 
 every_ufc_fight = every_ufc_fight[2:]
 event_years = event_years[1:]
@@ -134,8 +131,6 @@ fights = []
 for i in every_ufc_fight:
     for e in i:
         fights.append(e)
-fighters = []
-
 
 ''' ###GETTING EVERY EVENT'S YEAR !!!IMPORTANTE FOR MANUAL CHANGES
 for i in urls:
@@ -146,12 +141,11 @@ print(event_years)'''
 
 every_event_year = []
 def generate_ufc_fighters():
+    fighter_set = set()
     for i in fights:
-        if i != 'win' and i != 'nc' and i != 'draw' and i not in fighters:
-            fighters.append(i)
-    return fighters
-
-all_fighters = generate_ufc_fighters()
+        if i not in {'win', 'nc', 'draw'}:
+            fighter_set.add(i)
+    return list(fighter_set)
 
 
 starting_rating = 100
@@ -168,8 +162,8 @@ unbeaten_streak = {}
 last_5_fights = {}
 
 def generate_elo():
-    fighters = generate_ufc_fighters()
-    for i in fighters:
+    all_fighters = generate_ufc_fighters()
+    for i in all_fighters:
         elo.update({i:starting_rating})
         number_of_wins.update({i:0})
         number_of_losses.update({i:0})
@@ -245,7 +239,7 @@ def generate_elo():
     global sorted_dictionary
     global sorted_strenght_of_schedule
 
-    for i in fighters:
+    for i in all_fighters:
             if number_of_fights[i] > 0:
                 strenght_of_schedule[i] = strenght_of_schedule[i] / number_of_fights[i]
 
@@ -263,18 +257,18 @@ def update():
     new_years = []
     new_links = []
     new_fights = []
-    [new_links.append(i) for i in nl if i not in urls]
+    # Use a set for faster lookups
+    existing_urls = set(urls)
+    new_links = [i for i in nl if i not in existing_urls]
+
     if len(new_links) > 0:
-        [new_fights.append(scrapping(i)) for i in new_links]
-
-    for i in new_fights:
-        if i != None:
-            every_ufc_fight.append(i)
-            event_years.append(year)
-            new_years.append(year)
-
-            for e in i:
-                fights.append(e)
+        for link in new_links:
+            fight_results, event_year = scrapping(link)
+            if fight_results and event_year: # Ensure both are valid
+                new_fights.append(fight_results)
+                new_years.append(event_year)
+                # Add the new fight data to the main 'fights' list
+                fights.extend(fight_results)
     cont = 0
     for event in every_ufc_fight:
         number_of_events = int(len(event)/3)
@@ -504,18 +498,22 @@ def organize_files():
     print("\nWeb Files moved to", web_path)
 
 
-update()
-export_to_csv()
-csv_to_html_main_page()
-csv_to_html_lb()
-add_last_5_fights()
-organize_files()
+def main():
+    """Main execution function."""
+    update()
+    export_to_csv()
+    csv_to_html_main_page()
+    csv_to_html_lb()
+    add_last_5_fights()
+    organize_files()
 
-with open(csv_path, "a", newline="") as f: # new links has an upcoming event and new fights has a NonType
-    writer = csv.writer(f)
-    for i in range(len(new_links) - 1):
-        for j in range(0, len(new_fights[i]), 3):  
-            event_items = new_fights[i][j:j+3]
-            event_items.append(new_years[i])
-            event_items.append(new_links[i])
-            writer.writerow(event_items)
+    with open(csv_path, "a", newline="") as f:
+        writer = csv.writer(f)
+        for i, fight_list in enumerate(new_fights):
+            if not fight_list: continue
+            for j in range(0, len(fight_list), 3):
+                row = fight_list[j:j+3] + [new_years[i], new_links[i]]
+                writer.writerow(row)
+
+if __name__ == "__main__":
+    main()
