@@ -78,7 +78,12 @@ every_ufc_fight = []
 urls = []
 event_years = []
 ### RETURNS A LIST OF ALL FIGHTERS FROM THE SPECIFIED EVENT. (LOSER, WINNER, LOSER, WINNER, ...)
-csv_path = os.getcwd().replace("src", "csv/UFC_db.csv")
+
+# Get the directory where the current script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Construct the full path to the CSV file
+csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
+
 with open(csv_path, "r") as f:
     link_check = 'No link available'
     instance = []
