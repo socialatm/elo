@@ -84,34 +84,32 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 # Construct the full path to the CSV file
 csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
 
-with open(csv_path, "r") as f:
-    link_check = 'No link available'
-    instance = []
-    for row in f:
-        columns = row.strip().split(",")
-        loser = columns[0]
-        winner = columns[1]
-        method = columns[2]
-        year = columns[3]
-        link = columns[4]
+try:
+    with open(csv_path, "r", newline='') as f:
+        reader = csv.reader(f)
+        link_check = 'No link available'
+        instance = []
+        # Skip header if it exists
+        # next(reader, None) 
+        for row in reader:
+            if not row: continue # skip empty rows
+            loser, winner, method, year, link = row
 
-        urls.append(link)
+            urls.append(link)
 
-        if link == link_check:
-            instance.append(loser)
-            instance.append(winner)
-            instance.append(method)
-        else:
+            if link == link_check:
+                instance.extend([loser, winner, method])
+            else:
+                if instance:
+                    every_ufc_fight.append(instance)
+                event_years.append(year)
+                instance = [loser, winner, method]
+                link_check = link
+        if instance:
             event_years.append(year)
             every_ufc_fight.append(instance)
-            instance = []
-            link_check = link
-            instance.append(loser)
-            instance.append(winner)
-            instance.append(method)
-    if instance:
-        event_years.append(year)
-        every_ufc_fight.append(instance)
+except FileNotFoundError:
+    print(f"Warning: {csv_path} not found. Starting with an empty database.")
 
 every_ufc_fight = every_ufc_fight[2:]
 event_years = event_years[1:]
