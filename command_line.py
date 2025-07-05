@@ -324,7 +324,7 @@ fighters = display['Fighter']
 display['Peak Elo'] = fighters.map(peak_elo)
 display['Record'] = fighters.map(lambda f: f"{number_of_wins[f]}-{number_of_losses[f]}-{number_of_draws[f]}")
 display['Unbeaten Streak'] = fighters.map(unbeaten_streak)
-display['Avg Opp Elo'] = fighters.map(strength_of_schedule)
+display['Strength of Schedule'] = fighters.map(strength_of_schedule)
 
 # Sort the DataFrame by Elo Rating in descending order to show the top fighters first
 display = display.sort_values(by='Elo Rating', ascending=False)
@@ -333,5 +333,5 @@ display = display.sort_values(by='Elo Rating', ascending=False)
 display = display.set_index('Fighter')
 pd.options.display.float_format = '{:.1f}'.format
 
-print(f"\nTop {args.N} fighters (DataFrame):")
+print(f"\nTop {args.N} fighters:")
 print(display.head(args.N))
