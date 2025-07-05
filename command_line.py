@@ -1,60 +1,163 @@
+import requests
+from bs4 import BeautifulSoup
 import csv
+import pandas as pd
 import os
-import argparse
-from elo_logic import UfcEloCalculator
+import argparse 
 
-def print_elo_ranking(calculator, num_fighters, verbose=False):
-    """Prints the Elo ranking to the console."""
-    if not verbose:
-        print("\n--- UFC Elo Rankings ---")
-        for i, (fighter, elo) in enumerate(list(calculator.sorted_elo.items())[:num_fighters]):
-            print(f"{i+1:2d}. {fighter:<25} {elo:.1f}")
-    else:
-        print("\n--- UFC Elo Rankings (Verbose) ---")
-        header = (
-            f"{'Rank':<5} | {'Fighter':<25} | {'Elo':>8} | {'Peak Elo':>9} | "
-            f"{'Record':<10} | {'Streak':>6} | {'Avg Opp Elo':>12}"
-        )
-        print(header)
-        print("-" * len(header))
-        
-        for i, (fighter, elo) in enumerate(list(calculator.sorted_elo.items())[:num_fighters]):
-            record = (
-                f"{calculator.number_of_wins.get(fighter, 0)}-"
-                f"{calculator.number_of_losses.get(fighter, 0)}-"
-                f"{calculator.number_of_draws.get(fighter, 0)}"
-            )
-            peak = calculator.peak_elo.get(fighter, 0)
-            streak = calculator.unbeaten_streak.get(fighter, 0)
-            sos = calculator.strength_of_schedule.get(fighter, 0)
-            
-            print(
-                f"{i+1:<5} | {fighter:<25} | {elo:>8.1f} | {peak:>9.1f} | "
-                f"{record:<10} | {streak:>6} | {sos:>12.1f}"
-            )
+parser = argparse.ArgumentParser(description="Ranks UFC fighters by the Elo-rating system")
+parser.add_argument("-n", "--number", dest="N", type=int, default=15, help="Number of fighters to be displayed (default: %(default)s)")
+parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output with more columns")
 
-def main():
-    """Main execution function for the command-line tool."""
-    parser = argparse.ArgumentParser(description="Ranks UFC fighters by the Elo-rating system")
-    parser.add_argument("-n", "--number", type=int, default=15, help="Number of fighters to be displayed (default: %(default)s)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output with more columns")
-    args = parser.parse_args()
+args = parser.parse_args()
 
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
+def generate_ufc_stats_path():
+    response = requests.get(url="http://ufcstats.com/statistics/events/completed")
+    soup = BeautifulSoup(response.content, 'html.parser')
 
-    # 1. Initialize the calculator (loads data from CSV)
-    calculator = UfcEloCalculator(csv_path)
+    table = soup.find_all('a')
+    all_ufc_events_stats = []
+    for i in table:
+        if 'UFC' in i.text or 'The Ultimate Fighter' in i.text:
+            all_ufc_events_stats.append(i['href'])
+    all_ufc_events_stats.reverse()
+    return all_ufc_events_stats
 
-    # 2. Update with new fights from the web
-    calculator.update_from_web()
+def scrapping(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
 
-    # 3. Calculate Elo ratings for all fights
-    calculator.calculate_elo()
+    ###checking if the event has happened
 
-    # 4. Print the results based on user arguments
-    print_elo_ranking(calculator, args.number, args.verbose)
+    happened = soup.find('i', class_="b-flag__text")
+    try:
+        if (happened.text == 'win' or happened.text == 'draw' or happened.text == 'nc'):
 
+            table = soup.find_all('a', class_="b-link b-link_style_black")
+            ufc_fight_results = [i.text.strip() for i in table]
+            ufc_fight_results.reverse()
+
+            year_ = soup.find('li', class_='b-list__box-list-item')
+            year = year_.text.strip()[-4::]
+
+            ###checking for draws or NC
+            status = soup.find_all('i', class_="b-flag__text")
+            status_list = []
+            cont_draws = 2
+            cont_nc = 2
+            for i in status:
+                if i.text == 'draw':
+                    if cont_draws % 2 == 0:
+                        status_list.append(i.text)
+                        cont_draws += 1
+                    else:
+                        cont_draws += 1
+                        pass
+                elif i.text == 'nc':
+                    if cont_nc % 2 == 0:
+                        status_list.append(i.text)
+                        cont_nc += 1
+                    else:
+                        cont_nc += 1
+                else:
+
+                    status_list.append(i.text)
+            status_list.reverse()
+
+            aux = 2
+            cont = 0
+            for i in status_list:
+                ufc_fight_results.insert(aux+cont,i)
+                aux += 2
+                cont +=1
+
+            return ufc_fight_results, year
+    except AttributeError:
+        return None, None
+every_ufc_fight = []
+urls = []
+event_years = []
+### RETURNS A LIST OF ALL FIGHTERS FROM THE SPECIFIED EVENT. (LOSER, WINNER, LOSER, WINNER, ...)
+
+# Get the directory where the current script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Construct the full path to the CSV file
+csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
+
+try:
+    with open(csv_path, "r", newline='') as f:
+        reader = csv.reader(f)
+        link_check = 'No link available'
+        instance = []
+        # Skip header if it exists
+        # next(reader, None) 
+        for row in reader:
+            if not row: continue # skip empty rows
+            loser, winner, method, year, link = row
+
+            urls.append(link)
+
+            if link == link_check:
+                instance.extend([loser, winner, method])
+            else:
+                if instance:
+                    every_ufc_fight.append(instance)
+                event_years.append(year)
+                instance = [loser, winner, method]
+                link_check = link
+        if instance:
+            event_years.append(year)
+            every_ufc_fight.append(instance)
+except FileNotFoundError:
+    print(f"Warning: {csv_path} not found. Starting with an empty database.")
+
+every_ufc_fight = every_ufc_fight[2:]
+event_years = event_years[1:]
+time = 0
+
+'''
+links = generate_ufc_stats_path()
+for i in links:
+    try:
+        print(time)
+        print(i)
+        every_ufc_fight.append(scrapping(i))
+        time += 1
+
+    except:
+        pass
+'''
+### UFC FIGHTS DATA BASE
+
+fights = []
+for i in every_ufc_fight:
+    for e in i:
+        fights.append(e)
+
+''' ###GETTING EVERY EVENT'S YEAR !!!IMPORTANTE FOR MANUAL CHANGES
+for i in urls:
+    scrapping(i)
+    event_years.append(year)
+    print(len(event_years))
+print(event_years)'''
+
+every_event_year = []
+def generate_ufc_fighters():
+    fighter_set = set()
+    for i in fights:
+        if i not in {'win', 'nc', 'draw'}:
+            fighter_set.add(i)
+    return list(fighter_set)
+
+starting_rating = 1200
+k_factor = 32
+elo = {}
+peak_elo = {}
+number_of_wins = {}
+number_of_losses = {}
+number_of_draws = {}
+number_of_fights = {}
+strength_of_schedule = {} 
 peak_elo_year = {}
 unbeaten_streak = {}
 last_5_fights = {}
