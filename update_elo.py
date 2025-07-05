@@ -138,7 +138,6 @@ number_of_draws = {}
 number_of_fights = {}
 strength_of_schedule = {} 
 unbeaten_streak = {}
-last_5_fights = {}
 
 def generate_elo():
     all_fighters = generate_ufc_fighters()
@@ -150,12 +149,11 @@ def generate_elo():
         number_of_fights.update({i:0})
         unbeaten_streak.update({i:0})
         strength_of_schedule.update({i:0})
-        last_5_fights.update({i:[0,0,0,0,0]})
 
     aux = 0
     cont = 0
 
-    #print(fights)
+    print(fights)
 
     while (aux + 2) < len(fights):
 
@@ -182,9 +180,6 @@ def generate_elo():
             unbeaten_streak[fighter_b] += 1
             unbeaten_streak[fighter_a] = 0
 
-            last_5_fights[fighter_a].append(k_factor*(0 - expected_win_a))
-            last_5_fights[fighter_b].append(k_factor*(1 - expected_win_b))
-
         elif status == 'draw':
             elo[fighter_a] += k_factor*(0.5 - expected_win_a) 
             elo[fighter_b] += k_factor*(0.5 - expected_win_b)
@@ -194,9 +189,6 @@ def generate_elo():
 
             unbeaten_streak[fighter_b] += 1
             unbeaten_streak[fighter_a] += 1
-
-            last_5_fights[fighter_a].append(k_factor*(0.5 - expected_win_a))
-            last_5_fights[fighter_b].append(k_factor*(0.5 - expected_win_b))
 
         number_of_fights[fighter_a] += 1
         number_of_fights[fighter_b] += 1
