@@ -149,7 +149,7 @@ def generate_ufc_fighters():
             fighter_set.add(i)
     return list(fighter_set)
 
-starting_rating = 100
+starting_rating = 1200
 k_factor = 32
 elo = {}
 peak_elo = {}
