@@ -132,13 +132,11 @@ def generate_ufc_fighters():
 starting_rating = 1200
 k_factor = 32
 elo = {}
-peak_elo = {}
 number_of_wins = {}
 number_of_losses = {}
 number_of_draws = {}
 number_of_fights = {}
 strength_of_schedule = {} 
-peak_elo_year = {}
 unbeaten_streak = {}
 last_5_fights = {}
 
@@ -151,8 +149,6 @@ def generate_elo():
         number_of_draws.update({i:0})
         number_of_fights.update({i:0})
         unbeaten_streak.update({i:0})
-        peak_elo.update({i:starting_rating})
-        peak_elo_year.update({i: 'Never achieved'})
         strength_of_schedule.update({i:0})
         last_5_fights.update({i:[0,0,0,0,0]})
 
@@ -202,20 +198,11 @@ def generate_elo():
             last_5_fights[fighter_a].append(k_factor*(0.5 - expected_win_a))
             last_5_fights[fighter_b].append(k_factor*(0.5 - expected_win_b))
 
-        ### PEAK ELO
-        if elo[fighter_b] > peak_elo[fighter_b]:
-            peak_elo.update({fighter_b:elo[fighter_b]})
-            peak_elo_year.update({fighter_b:every_event_year[cont]})
-        if elo[fighter_a] > peak_elo[fighter_a]:
-            peak_elo.update({fighter_a:elo[fighter_a]})
-            peak_elo_year.update({fighter_a:every_event_year[cont]})
-
         number_of_fights[fighter_a] += 1
         number_of_fights[fighter_b] += 1
 
         aux += 3
         cont += 1
-    global peak_elo_sorted
     global sorted_dictionary
     global sorted_strength_of_schedule
 
@@ -224,7 +211,6 @@ def generate_elo():
                 strength_of_schedule[i] = strength_of_schedule[i] / number_of_fights[i]
 
     sorted_strength_of_schedule = {k: v for k, v in sorted(strength_of_schedule.items(), key=lambda item: item[1])}
-    peak_elo_sorted = {k: v for k, v in sorted(peak_elo.items(), key=lambda item: item[1])}
     sorted_dictionary = {k: v for k, v in sorted(elo.items(), key=lambda item: item[1])}
     return sorted_dictionary
 
@@ -276,7 +262,6 @@ display = pd.DataFrame(list(sorted_dictionary_updated.items()), columns=['Fighte
 
 # Add additional stats from the other dictionaries, similar to the verbose output
 fighters = display['Fighter']
-display['Peak Elo'] = fighters.map(peak_elo)
 display['Record'] = fighters.map(lambda f: f"{number_of_wins[f]}-{number_of_losses[f]}-{number_of_draws[f]}")
 display['Unbeaten Streak'] = fighters.map(unbeaten_streak)
 display['Strength of Schedule'] = fighters.map(strength_of_schedule)
