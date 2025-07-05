@@ -308,7 +308,16 @@ else:
 # load sorted_dictionary_updated into a DataFrame named display
 display = pd.DataFrame(list(sorted_dictionary_updated.items()), columns=['Fighter', 'Elo Rating'])
 
-print(display.tail())
+# Add additional stats from the other dictionaries, similar to the verbose output
+fighters = display['Fighter']
+display['Peak Elo'] = fighters.map(peak_elo)
+display['Record'] = fighters.map(lambda f: f"{number_of_wins[f]}-{number_of_losses[f]}-{number_of_draws[f]}")
+display['Unbeaten Streak'] = fighters.map(unbeaten_streak)
+display['Avg Opp Elo'] = fighters.map(strength_of_schedule)
 
+# Set the fighter's name as the index and format the output
+display = display.set_index('Fighter')
+pd.options.display.float_format = '{:.1f}'.format
 
-
+print(f"\nTop {args.N} fighters (DataFrame):")
+print(display.tail(args.N))
