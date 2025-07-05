@@ -113,31 +113,12 @@ every_ufc_fight = every_ufc_fight[2:]
 event_years = event_years[1:]
 time = 0
 
-'''
-links = generate_ufc_stats_path()
-for i in links:
-    try:
-        print(time)
-        print(i)
-        every_ufc_fight.append(scrapping(i))
-        time += 1
-
-    except:
-        pass
-'''
 ### UFC FIGHTS DATA BASE
 
 fights = []
 for i in every_ufc_fight:
     for e in i:
         fights.append(e)
-
-''' ###GETTING EVERY EVENT'S YEAR !!!IMPORTANTE FOR MANUAL CHANGES
-for i in urls:
-    scrapping(i)
-    event_years.append(year)
-    print(len(event_years))
-print(event_years)'''
 
 every_event_year = []
 def generate_ufc_fighters():
