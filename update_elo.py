@@ -271,7 +271,7 @@ display = display.sort_values(by='Elo Rating', ascending=False)
 
 # Set the fighter's name as the index and format the output
 display = display.set_index('Fighter')
-pd.options.display.float_format = '{:.1f}'.format
+pd.options.display.float_format = '{:.0f}'.format
 
 print(f"\nTop {args.N} fighters:")
 print(display.head(args.N))

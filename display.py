@@ -7,7 +7,7 @@ args = parser.parse_args()
 
 display = pd.read_csv('display.csv')
 display = display.set_index('Fighter')
-pd.options.display.float_format = '{:.1f}'.format
+pd.options.display.float_format = '{:.0f}'.format
 
 print(f"\nTop {args.N} fighters:")
 print(display.head(args.N))
