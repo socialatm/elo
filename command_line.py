@@ -7,8 +7,6 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Ranks UFC fighters by the Elo-rating system")
 parser.add_argument("-n", "--number", dest="N", type=int, default=15, help="Number of fighters to be displayed (default: %(default)s)")
-# parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output with more columns")
-
 args = parser.parse_args()
 
 def generate_ufc_stats_path():
@@ -290,35 +288,6 @@ def update():
     return sorted_dictionary_updated
 
 update()
-
-'''
-
-
-def print_last_items(dict_, x):
-    cont = 1
-    items = list(dict_.items())[-x:]
-    for key, value in reversed(items):
-        print(f"{cont}° - {key}: {value:.1f}")
-        cont += 1
-
-def print_last_items_verbose(x):
-    cont = 1
-    items = list(sorted_dictionary_updated.items())[-x:]
-    print("Rank  | Fighter                  | Elo Rating | Peak Elo | Record   |Streak | Avg. Opp. Elo")
-    print("------|--------------------------|------------|----------|----------|-------|--------------")
-    for key, value in reversed(items):
-        peak_elo_value = peak_elo[key] if key in peak_elo else "N/A"  # Handle cases where peak_elo is not available
-        fighter_info = f"{cont}°".ljust(6) + "| " + key.ljust(25) + "| " + f"{value:.1f}".ljust(11) + "| " + \
-                       f"{peak_elo_value:.1f}".ljust(9) + "| " + f"{number_of_wins[key]}-{number_of_losses[key]}-{number_of_draws[key]}".ljust(9) + "| " + \
-                       f"{unbeaten_streak[key]}".ljust(6) + "| " + f"{strength_of_schedule[key]:.1f}"
-        print(fighter_info)
-        cont += 1
-
-if args.verbose:
-    print_last_items_verbose(args.N)
-else:
-    print_last_items(sorted_dictionary_updated, args.N)
-'''
 
 # load sorted_dictionary_updated into a DataFrame named display
 display = pd.DataFrame(list(sorted_dictionary_updated.items()), columns=['Fighter', 'Elo Rating'])
