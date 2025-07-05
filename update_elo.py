@@ -151,7 +151,6 @@ def generate_elo():
         strength_of_schedule.update({i:0})
 
     aux = 0
-    cont = 0
 
     print(fights)
 
@@ -194,7 +193,6 @@ def generate_elo():
         number_of_fights[fighter_b] += 1
 
         aux += 3
-        cont += 1
     global sorted_dictionary
     global sorted_strength_of_schedule
 
