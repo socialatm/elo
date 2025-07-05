@@ -80,7 +80,8 @@ event_years = []
 # Get the directory where the current script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # Construct the full path to the CSV file
-csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
+#csv_path = os.path.join(script_dir, "csv", "UFC_db.csv")
+csv_path = "ufc.csv"
 
 try:
     with open(csv_path, "r", newline='') as f:
