@@ -114,7 +114,7 @@ every_ufc_fight = every_ufc_fight[2:]
 event_years = event_years[1:]
 time = 0
 
-### UFC FIGHTS DATA BASE
+# UFC fights database
 
 fights = []
 for i in every_ufc_fight:
@@ -195,7 +195,7 @@ def generate_elo():
         number_of_fights[fighter_b] += 1
 
         aux += 3 # increment the loop counter by 3
-        
+
     global sorted_dictionary
     global sorted_strength_of_schedule
 
