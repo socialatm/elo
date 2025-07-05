@@ -289,3 +289,4 @@ pd.options.display.float_format = '{:.1f}'.format
 
 print(f"\nTop {args.N} fighters:")
 print(display.head(args.N))
+print(f"\n")
