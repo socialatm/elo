@@ -304,3 +304,8 @@ if args.verbose:
     print_last_items_verbose(args.N)
 else:
     print_last_items(sorted_dictionary_updated, args.N)
+
+# load sorted_dictionary_updated into a DataFrame named display
+display = pd.DataFrame(list(sorted_dictionary_updated.items()), columns=['Fighter', 'Elo Rating'])
+print(display.head())
+
