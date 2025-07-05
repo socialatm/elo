@@ -307,5 +307,8 @@ else:
 
 # load sorted_dictionary_updated into a DataFrame named display
 display = pd.DataFrame(list(sorted_dictionary_updated.items()), columns=['Fighter', 'Elo Rating'])
-print(display.head())
+
+print(display.tail())
+
+
 
