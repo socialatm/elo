@@ -290,3 +290,6 @@ pd.options.display.float_format = '{:.1f}'.format
 print(f"\nTop {args.N} fighters:")
 print(display.head(args.N))
 print(f"\n")
+
+# save the display dataframe to a csv file named display.csv
+display.to_csv('display.csv')
