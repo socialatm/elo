@@ -157,7 +157,7 @@ number_of_wins = {}
 number_of_losses = {}
 number_of_draws = {}
 number_of_fights = {}
-strenght_of_schedule = {} 
+strength_of_schedule = {} 
 peak_elo_year = {}
 unbeaten_streak = {}
 last_5_fights = {}
@@ -173,7 +173,7 @@ def generate_elo():
         unbeaten_streak.update({i:0})
         peak_elo.update({i:starting_rating})
         peak_elo_year.update({i: 'Never achieved'})
-        strenght_of_schedule.update({i:0})
+        strength_of_schedule.update({i:0})
         last_5_fights.update({i:[0,0,0,0,0]})
 
     aux = 0
@@ -187,8 +187,8 @@ def generate_elo():
         fighter_b = fights[aux+1]  ##winner
         status = fights[aux + 2]
         
-        strenght_of_schedule[fighter_a] += elo[fighter_b]
-        strenght_of_schedule[fighter_b] += elo[fighter_a]
+        strength_of_schedule[fighter_a] += elo[fighter_b]
+        strength_of_schedule[fighter_b] += elo[fighter_a]
 
         if status == 'win':
             transformed_rating_a = 10**((elo[fighter_a])/400)
@@ -237,13 +237,13 @@ def generate_elo():
         cont += 1
     global peak_elo_sorted
     global sorted_dictionary
-    global sorted_strenght_of_schedule
+    global sorted_strength_of_schedule
 
     for i in all_fighters:
             if number_of_fights[i] > 0:
-                strenght_of_schedule[i] = strenght_of_schedule[i] / number_of_fights[i]
+                strength_of_schedule[i] = strength_of_schedule[i] / number_of_fights[i]
 
-    sorted_strenght_of_schedule = {k: v for k, v in sorted(strenght_of_schedule.items(), key=lambda item: item[1])}
+    sorted_strength_of_schedule = {k: v for k, v in sorted(strength_of_schedule.items(), key=lambda item: item[1])}
     peak_elo_sorted = {k: v for k, v in sorted(peak_elo.items(), key=lambda item: item[1])}
     sorted_dictionary = {k: v for k, v in sorted(elo.items(), key=lambda item: item[1])}
     return sorted_dictionary
@@ -296,7 +296,7 @@ def print_last_items_verbose(x):
         peak_elo_value = peak_elo[key] if key in peak_elo else "N/A"  # Handle cases where peak_elo is not available
         fighter_info = f"{cont}°".ljust(6) + "| " + key.ljust(25) + "| " + f"{value:.1f}".ljust(11) + "| " + \
                        f"{peak_elo_value:.1f}".ljust(9) + "| " + f"{number_of_wins[key]}-{number_of_losses[key]}-{number_of_draws[key]}".ljust(9) + "| " + \
-                       f"{unbeaten_streak[key]}".ljust(6) + "| " + f"{strenght_of_schedule[key]:.1f}"
+                       f"{unbeaten_streak[key]}".ljust(6) + "| " + f"{strength_of_schedule[key]:.1f}"
         print(fighter_info)
         cont += 1
 
