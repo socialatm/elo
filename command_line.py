@@ -7,7 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Ranks UFC fighters by the Elo-rating system")
 parser.add_argument("-n", "--number", dest="N", type=int, default=15, help="Number of fighters to be displayed (default: %(default)s)")
-parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output with more columns")
+# parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output with more columns")
 
 args = parser.parse_args()
 
@@ -291,6 +291,9 @@ def update():
 
 update()
 
+'''
+
+
 def print_last_items(dict_, x):
     cont = 1
     items = list(dict_.items())[-x:]
@@ -315,6 +318,7 @@ if args.verbose:
     print_last_items_verbose(args.N)
 else:
     print_last_items(sorted_dictionary_updated, args.N)
+'''
 
 # load sorted_dictionary_updated into a DataFrame named display
 display = pd.DataFrame(list(sorted_dictionary_updated.items()), columns=['Fighter', 'Elo Rating'])
