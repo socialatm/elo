@@ -149,8 +149,8 @@ def generate_elo():
         number_of_fights.update({i:0})
         unbeaten_streak.update({i:0})
         strength_of_schedule.update({i:0})
-
-    aux = 0
+    
+    aux = 0 # loop counter this loop
 
     print(fights)
 
@@ -160,9 +160,11 @@ def generate_elo():
         fighter_b = fights[aux+1]  ##winner
         status = fights[aux + 2]
         
+        # Update strength of schedule with opponent's current Elo
         strength_of_schedule[fighter_a] += elo[fighter_b]
         strength_of_schedule[fighter_b] += elo[fighter_a]
 
+        # Calculate expected win probabilities
         if status == 'win':
             transformed_rating_a = 10**((elo[fighter_a])/400)
             transformed_rating_b = 10**((elo[fighter_b])/400)
@@ -192,7 +194,8 @@ def generate_elo():
         number_of_fights[fighter_a] += 1
         number_of_fights[fighter_b] += 1
 
-        aux += 3
+        aux += 3 # increment the loop counter by 3
+        
     global sorted_dictionary
     global sorted_strength_of_schedule
 
