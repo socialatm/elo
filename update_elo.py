@@ -25,7 +25,7 @@ def scrapping(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    ###checking if the event has happened
+    # checking if the event has happened
 
     happened = soup.find('i', class_="b-flag__text")
     try:
@@ -122,6 +122,7 @@ for i in every_ufc_fight:
         fights.append(e)
 
 every_event_year = []
+
 def generate_ufc_fighters():
     fighter_set = set()
     for i in fights:
