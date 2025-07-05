@@ -249,24 +249,35 @@ def generate_elo():
     return sorted_dictionary
 
 def update():
-    global new_fights
-    global new_links
-    global new_years
     global sorted_dictionary_updated
     nl = generate_ufc_stats_path()
-    new_years = []
-    new_links = []
-    new_fights = []
     existing_urls = set(urls)
     new_links = [i for i in nl if i not in existing_urls]
 
     if len(new_links) > 0:
-        for link in new_links:
-            fight_results, event_year = scrapping(link)
-            if fight_results and event_year:
-                new_fights.append(fight_results)
-                new_years.append(event_year)
-                fights.extend(fight_results)
+        print(f"Found {len(new_links)} new event(s). Appending to CSV database...")
+        # Open the CSV in append mode to add new fights
+        with open(csv_path, "a", newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            # Process oldest new events first to maintain chronological order
+            for link in reversed(new_links):
+                fight_results, event_year = scrapping(link)
+                if fight_results and event_year:
+                    print(f"  - Scraping and writing data for: {link}")
+                    # Update in-memory lists for the current script run
+                    fights.extend(fight_results)
+                    every_ufc_fight.append(fight_results)
+                    event_years.append(event_year)
+                    urls.append(link)
+
+                    # Write each new fight to the CSV file
+                    aux = 0
+                    while (aux + 2) < len(fight_results):
+                        loser, winner, method = fight_results[aux], fight_results[aux+1], fight_results[aux+2]
+                        writer.writerow([loser, winner, method, event_year, link])
+                        aux += 3
+        print("CSV database update complete.")
+
     cont = 0
     for event in every_ufc_fight:
         number_of_events = int(len(event)/3)
@@ -315,9 +326,12 @@ display['Record'] = fighters.map(lambda f: f"{number_of_wins[f]}-{number_of_loss
 display['Unbeaten Streak'] = fighters.map(unbeaten_streak)
 display['Avg Opp Elo'] = fighters.map(strength_of_schedule)
 
+# Sort the DataFrame by Elo Rating in descending order to show the top fighters first
+display = display.sort_values(by='Elo Rating', ascending=False)
+
 # Set the fighter's name as the index and format the output
 display = display.set_index('Fighter')
 pd.options.display.float_format = '{:.1f}'.format
 
 print(f"\nTop {args.N} fighters (DataFrame):")
-print(display.tail(args.N))
+print(display.head(args.N))
